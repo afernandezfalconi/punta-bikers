@@ -1,0 +1,43 @@
+# Version control
+.git
+.gitignore
+.gitattributes
+
+# Dependencies
+node_modules
+package-lock.json
+yarn.lock
+
+# Development
+.env.local
+.env.*.local
+.next/cache
+
+# Testing
+src/test
+e2e
+vitest.config.ts
+playwright.config.ts
+*.test.ts
+*.test.tsx
+*.spec.ts
+
+# Documentation
+*.md
+CLAUDE.md
+READY_TO_SHIP.md
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build artifacts (keep .next for production)
+coverage
+dist
+build

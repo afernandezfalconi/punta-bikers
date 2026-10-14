@@ -1,36 +1,87 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PUNTA BIKERS
 
-## Getting Started
+SaaS para administración integral de rentas de scooters en Puerto Escondido, Oaxaca.
 
-First, run the development server:
+## Quick Start
 
 ```bash
+# 1. Install dependencies (already done)
+npm install
+
+# 2. Update .env.local with Supabase + Stripe credentials
+# See: .env.example for what you need
+
+# 3. Start development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
+# Open: http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Project Structure
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+punta-bikers/
+├── app/                    # Next.js App Router (pages + API routes)
+├── components/             # React components (ui/, marketing/, app/)
+├── lib/                    # Utilities (supabase, stripe, auth, db)
+├── public/                 # Static assets
+├── prisma/                 # Database schema (not yet created)
+├── .env.local              # Environment variables (git-ignored)
+├── CLAUDE.md               # Project instructions + rules
+├── PROGRESS.md             # Build checkpoint (Step 1/17)
+└── punta-bikers-blueprint.md # Complete architecture (8500+ lines)
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Build Status
 
-## Learn More
+**Current Step:** 1 of 17 ✅  
+**Progress:** Scaffolding complete
 
-To learn more about Next.js, take a look at the following resources:
+### Next: Step 2 (Supabase Setup & Database)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Before continuing, you need:
+1. **Supabase project** (get URL + keys)
+2. **Stripe account** (get keys + webhook secret)
+3. **Update `.env.local`** with credentials
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+See `PROGRESS.md` for detailed checklist.
 
-## Deploy on Vercel
+## Key Files
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **`CLAUDE.md`** — Read this first: project architecture, code rules, design system
+- **`PROGRESS.md`** — Current build status (which step you're on, what's done, what's next)
+- **`punta-bikers-blueprint.md`** (in parent: `C:\Users\HP\`) — Complete 17-step build guide
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Development Commands
+
+```bash
+npm run dev           # Start dev server
+npm run build         # Production build
+npm run lint          # Run linter
+npm test              # Run tests
+npx prisma studio    # Open Prisma Studio (once DB is set up)
+```
+
+## Tech Stack
+
+- **Next.js 15** + **React 19** + **TypeScript**
+- **Tailwind CSS v4** + **shadcn/ui**
+- **Supabase** (PostgreSQL) + **Prisma ORM**
+- **Stripe** for payments
+- **Vercel** for hosting
+
+## Important
+
+⚠️ **Do NOT commit `.env.local`** — it contains secrets  
+✅ **Copy from `.env.example`** when setting up  
+✅ **All financial calculations are server-side** — never trust client-side math  
+✅ **TypeScript strict mode** — no `any` types
+
+## Next Steps
+
+1. Create Supabase project
+2. Create Stripe account
+3. Update `.env.local`
+4. Follow Step 2 in `punta-bikers-blueprint.md`
+
+For full build order, see: **`C:\Users\HP\punta-bikers-blueprint.md`** (Section 9)

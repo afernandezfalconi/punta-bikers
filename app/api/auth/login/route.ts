@@ -44,9 +44,13 @@ export async function POST(req: NextRequest) {
 
     return response;
   } catch (error) {
-    console.error('Login error:', error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error('Login error:', errorMessage);
+    console.error('Full error:', error);
+    console.error('Env check - URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? 'SET' : 'NOT SET');
+    console.error('Env check - KEY:', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'SET' : 'NOT SET');
     return NextResponse.json(
-      { error: 'An error occurred during login' },
+      { error: 'An error occurred during login: ' + errorMessage },
       { status: 500 }
     );
   }
