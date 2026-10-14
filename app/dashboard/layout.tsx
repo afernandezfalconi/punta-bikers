@@ -22,6 +22,12 @@ export default function DashboardLayout({
               Scooters
             </a>
             <a
+              href="/dashboard/rentals"
+              className="text-blue-100 hover:text-white transition"
+            >
+              Rentas
+            </a>
+            <a
               href="/api/auth/logout"
               className="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-200 rounded-lg transition"
             >
