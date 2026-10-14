@@ -47,6 +47,23 @@ export async function POST(req: NextRequest) {
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
     );
 
+    // Verify authentication + admin role (TODO: add admin role check)
+    const token = req.cookies.get('sb-access-token')?.value;
+    if (!token) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    const { data: user, error: authError } = await supabase.auth.getUser(token);
+    if (authError || !user.user?.id) {
+      return NextResponse.json(
+        { error: 'Invalid authentication' },
+        { status: 401 }
+      );
+    }
+
     const body = (await req.json()) as Scooter;
 
     if (!body.model || !body.licensePlate || !body.pricePerHour) {

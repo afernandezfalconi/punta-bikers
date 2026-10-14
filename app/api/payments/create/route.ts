@@ -7,23 +7,70 @@ const MP_ACCESS_TOKEN = process.env.MERCADOPAGO_ACCESS_TOKEN;
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    const { rental_id, amount, title } = body;
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+    );
 
-    if (!rental_id || !amount) {
+    // Verify authentication
+    const token = req.cookies.get('sb-access-token')?.value;
+    if (!token) {
       return NextResponse.json(
-        { error: 'Missing rental_id or amount' },
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    const { data: user, error: authError } = await supabase.auth.getUser(token);
+    if (authError || !user.user?.id) {
+      return NextResponse.json(
+        { error: 'Invalid authentication' },
+        { status: 401 }
+      );
+    }
+
+    const body = await req.json();
+    const { rental_id } = body;
+
+    if (!rental_id) {
+      return NextResponse.json(
+        { error: 'Missing rental_id' },
         { status: 400 }
       );
     }
+
+    // Fetch rental from database to get actual cost (NEVER trust client)
+    const { data: rental, error: rentalError } = await supabase
+      .from('rentals')
+      .select('cost, user_id, scooter_id')
+      .eq('id', rental_id)
+      .single();
+
+    if (rentalError || !rental) {
+      return NextResponse.json(
+        { error: 'Rental not found' },
+        { status: 404 }
+      );
+    }
+
+    // Verify user owns this rental
+    if (rental.user_id !== user.user.id) {
+      return NextResponse.json(
+        { error: 'Forbidden' },
+        { status: 403 }
+      );
+    }
+
+    // Use SERVER-SIDE cost, NOT client-provided amount
+    const amount = rental.cost;
 
     // Create Mercado Pago preference
     const preference = {
       items: [
         {
-          title: title || 'Renta de Scooter - PUNTA BIKERS',
+          title: 'Renta de Scooter - PUNTA BIKERS',
           quantity: 1,
-          unit_price: parseFloat(amount),
+          unit_price: parseFloat(amount.toString()),
         },
       ],
       payer: {
@@ -55,11 +102,6 @@ export async function POST(req: NextRequest) {
     const mpData = await mpResponse.json();
 
     // Save payment record in Supabase
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-    );
-
     const { data: payment, error } = await supabase
       .from('payments')
       .insert([

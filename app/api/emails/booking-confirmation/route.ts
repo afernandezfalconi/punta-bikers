@@ -3,8 +3,28 @@ import { NextRequest, NextResponse } from 'next/server';
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const RESEND_API = 'https://api.resend.com/emails';
 
+function escapeHtml(text: string): string {
+  const map: { [key: string]: string } = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;',
+  };
+  return text.replace(/[&<>"']/g, char => map[char]);
+}
+
 export async function POST(req: NextRequest) {
   try {
+    // Verify authentication
+    const token = req.cookies.get('sb-access-token')?.value;
+    if (!token) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
     const body = await req.json();
     const {
       userEmail,
@@ -23,22 +43,27 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Escape all user inputs to prevent HTML injection
+    const safeUserName = escapeHtml(userName || 'Cliente');
+    const safeModel = escapeHtml(scooterModel);
+    const safePlate = escapeHtml(licensePlate);
+
     const emailContent = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <h2 style="color: #004E89;">¡Confirmación de Renta - PUNTA BIKERS!</h2>
 
-      <p>Hola ${userName || 'Cliente'},</p>
+      <p>Hola ${safeUserName},</p>
 
       <p>Tu renta ha sido confirmada exitosamente. Aquí están los detalles:</p>
 
       <div style="background-color: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
         <p><strong>Detalles de la Renta:</strong></p>
         <ul style="list-style: none; padding: 0;">
-          <li>📍 <strong>Scooter:</strong> ${scooterModel}</li>
-          <li>🏷️ <strong>Placa:</strong> ${licensePlate}</li>
-          <li>📅 <strong>Inicio:</strong> ${new Date(startTime).toLocaleString('es-MX')}</li>
+          <li>📍 <strong>Scooter:</strong> ${safeModel}</li>
+          <li>🏷️ <strong>Placa:</strong> ${safePlate}</li>
+          <li>📅 <strong>Inicio:</strong> ${escapeHtml(new Date(startTime).toLocaleString('es-MX'))}</li>
           <li>💰 <strong>Costo:</strong> $${cost.toFixed(2)} MXN</li>
-          <li>🆔 <strong>ID de Renta:</strong> ${rentalId}</li>
+          <li>🆔 <strong>ID de Renta:</strong> ${escapeHtml(rentalId)}</li>
         </ul>
       </div>
 

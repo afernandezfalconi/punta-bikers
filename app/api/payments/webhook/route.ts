@@ -1,11 +1,53 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import crypto from 'crypto';
 
 const MERCADO_PAGO_API = 'https://api.mercadopago.com/v1';
 const MP_ACCESS_TOKEN = process.env.MERCADOPAGO_ACCESS_TOKEN;
+const MP_WEBHOOK_SECRET = process.env.MERCADOPAGO_WEBHOOK_SECRET;
+
+function verifyMercadoPagoSignature(req: NextRequest): boolean {
+  const signature = req.headers.get('x-signature');
+  const requestId = req.headers.get('x-request-id');
+
+  if (!signature || !requestId) {
+    return false;
+  }
+
+  // MP sends signature as: "ts=<timestamp>,v1=<hash>"
+  const parts = signature.split(',');
+  let ts = '';
+  let v1 = '';
+
+  parts.forEach(part => {
+    const [key, value] = part.split('=');
+    if (key === 'ts') ts = value;
+    if (key === 'v1') v1 = value;
+  });
+
+  if (!ts || !v1) {
+    return false;
+  }
+
+  const dataToSign = `id=${requestId};request-id=${requestId};ts=${ts}`;
+  const expectedSignature = crypto
+    .createHmac('sha256', MP_WEBHOOK_SECRET || '')
+    .update(dataToSign)
+    .digest('hex');
+
+  return v1 === expectedSignature;
+}
 
 export async function POST(req: NextRequest) {
   try {
+    // Verify webhook signature
+    if (!verifyMercadoPagoSignature(req)) {
+      return NextResponse.json(
+        { error: 'Invalid signature' },
+        { status: 401 }
+      );
+    }
+
     const { action, data } = await req.json();
 
     // Handle Mercado Pago webhook
