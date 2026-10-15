@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button'
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white overflow-hidden" style={{ scrollBehavior: 'smooth' }}>
       {/* Animated gradient background */}
       <div className="fixed inset-0 -z-10">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500 rounded-full blur-3xl opacity-20 animate-pulse"></div>
@@ -40,24 +40,24 @@ export default function Home() {
       <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-20">
         <div className="text-center space-y-6 sm:space-y-8 mb-16 sm:mb-20">
           <div className="space-y-3 sm:space-y-4">
-            <h2 className="text-3xl sm:text-5xl md:text-7xl font-bold leading-tight">
+            <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold leading-tight" style={{ textWrap: 'balance' }}>
               Explore Puerto Escondido
-            </h2>
-            <p className="text-base sm:text-lg md:text-xl text-slate-300 max-w-2xl mx-auto px-2">
+            </h1>
+            <p className="text-base sm:text-lg md:text-xl text-slate-300 max-w-2xl mx-auto px-2 leading-relaxed">
               Rent premium scooters and discover the beauty of Puerto Escondido. Flexible daily rates, instant booking, and 24/7 support.
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/auth/signup" className="w-full sm:w-auto">
-              <Button size="lg" className="bg-gradient-to-r from-blue-500 to-orange-500 hover:from-blue-600 hover:to-orange-600 w-full sm:w-auto h-12 sm:h-11 text-base">
+              <button className="w-full sm:w-auto h-12 sm:h-11 px-8 bg-gradient-to-r from-blue-500 to-orange-500 hover:from-blue-600 hover:to-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-400 font-semibold text-base rounded-lg transition-all duration-200 cursor-pointer">
                 Start Renting
-              </Button>
+              </button>
             </Link>
             <Link href="#pricing" className="w-full sm:w-auto">
-              <Button size="lg" variant="outline" className="border-white/30 hover:bg-white/10 w-full sm:w-auto h-12 sm:h-11 text-base">
+              <button className="w-full sm:w-auto h-12 sm:h-11 px-8 border border-white/30 hover:bg-white/10 hover:border-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400 font-semibold text-base rounded-lg transition-all duration-200 cursor-pointer">
                 View Pricing
-              </Button>
+              </button>
             </Link>
           </div>
         </div>
@@ -83,12 +83,14 @@ export default function Home() {
           ].map((feature, i) => (
             <div
               key={i}
-              className="group backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl p-6 sm:p-8 hover:bg-white/20 hover:border-white/30 transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/20 touch-manipulation"
+              className="group backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl p-6 sm:p-8 hover:bg-white/20 hover:border-white/40 focus-within:ring-2 focus-within:ring-orange-400 transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/20 touch-manipulation cursor-pointer"
+              role="button"
+              tabIndex={0}
             >
               <div className="text-3xl sm:text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">
                 {feature.icon}
               </div>
-              <h3 className="text-lg sm:text-xl font-semibold mb-2">{feature.title}</h3>
+              <h3 className="text-lg sm:text-xl font-bold mb-2 text-white">{feature.title}</h3>
               <p className="text-slate-300 text-sm leading-relaxed">
                 {feature.description}
               </p>
@@ -99,7 +101,7 @@ export default function Home() {
         {/* Pricing Section */}
         <div id="pricing" className="mb-16 sm:mb-20">
           <div className="text-center mb-8 sm:mb-12">
-            <h3 className="text-3xl sm:text-4xl font-bold mb-3 sm:mb-4">Simple, Transparent Pricing</h3>
+            <h2 className="text-3xl sm:text-4xl font-bold mb-3 sm:mb-4" style={{ textWrap: 'balance' }}>Simple, Transparent Pricing</h2>
             <p className="text-slate-300 text-sm sm:text-base">Choose the plan that fits your needs</p>
           </div>
 
