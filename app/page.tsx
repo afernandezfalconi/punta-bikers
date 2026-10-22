@@ -310,25 +310,26 @@ export default function Home() {
       </nav>
 
       {/* Hero */}
-      <div className="bg-gradient-to-b from-amber-50 to-white py-20 sm:py-32 px-4">
-        <div className="max-w-4xl mx-auto text-center space-y-8">
-          <div className="inline-block px-4 py-2 border border-amber-700 text-amber-700 text-sm font-semibold tracking-widest">
+      <div className="relative py-32 sm:py-48 px-4 overflow-hidden" style={{ backgroundImage: 'url(/images/coast-hero.jpg)', backgroundSize: 'cover', backgroundPosition: 'center' }}>
+        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/60"></div>
+        <div className="relative max-w-4xl mx-auto text-center text-white space-y-8 z-10">
+          <div className="inline-block px-4 py-2 border border-amber-300 text-amber-300 text-sm font-semibold tracking-widest">
             {lang === 'es' ? 'SCOOTERS PREMIUM' : 'PREMIUM SCOOTERS'}
           </div>
-          <h1 className="text-5xl sm:text-7xl font-bold leading-tight" style={{ textWrap: 'balance' }}>
+          <h1 className="text-5xl sm:text-7xl font-bold leading-tight text-white drop-shadow-lg" style={{ textWrap: 'balance' }}>
             {lang === 'es' ? 'Recorre Puerto Escondido' : 'Ride Puerto Escondido'}
           </h1>
-          <p className="text-base sm:text-lg text-stone-600 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-base sm:text-lg text-amber-50 max-w-2xl mx-auto leading-relaxed drop-shadow-md">
             {t.statement[0]} <br /> {t.statement[1]}
           </p>
           <div className="flex flex-col sm:flex-row gap-6 justify-center pt-4">
             <Link href="/auth/signup">
-              <button className="h-14 px-10 bg-stone-950 hover:bg-black text-white font-semibold text-base transition-all duration-300 shadow-xl hover:shadow-2xl cursor-pointer border border-stone-950">
+              <button className="h-14 px-10 bg-white text-stone-950 font-semibold text-base transition-all duration-300 shadow-xl hover:shadow-2xl cursor-pointer border border-white hover:bg-amber-50">
                 {t.findCta}
               </button>
             </Link>
             <a href="#scooters">
-              <button className="h-14 px-10 bg-amber-700 text-white font-semibold text-base transition-all duration-300 shadow-lg hover:shadow-xl hover:bg-amber-800 border border-amber-700">
+              <button className="h-14 px-10 bg-amber-600 hover:bg-amber-700 text-white font-semibold text-base transition-all duration-300 shadow-lg hover:shadow-xl border border-amber-600">
                 {t.feel} <ArrowDown className="inline ml-2" size={16} />
               </button>
             </a>
