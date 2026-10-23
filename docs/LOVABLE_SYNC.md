@@ -6,7 +6,7 @@ La landing (`/`) se diseña en **Lovable**. La app (dashboard, auth, admin, pago
 Lovable (diseña)  ──push──▶  GitHub: rama punta-biker-landing   (fuente de verdad del diseño)
                                        │  npm run sync:lovable
                                        ▼
-                    GitHub: rama main (este repo)  ──auto-deploy──▶  Vercel (producción)
+                    GitHub: rama main (este repo)  ──vercel --prod──▶  Vercel (producción)
                                        ▲
                           feedback ◀───┴─── hallazgos del port → mensaje a Lovable
 ```
@@ -30,8 +30,9 @@ Lovable (diseña)  ──push──▶  GitHub: rama punta-biker-landing   (fuen
 | 4 | Paridad contra Lovable (texto, assets, alts, aria-labels) | `npm run dev` y en otra terminal `npm run verify:landing` | `PARITY OK` |
 | 5 | Revisión visual: escritorio y móvil (hero, flota 360°, modal de consulta, FAQ, menú móvil, cambio ES/EN) | abrir `http://localhost:3000` junto a `https://puntabiker.lovable.app` | Igual a Lovable |
 | 6 | Confirmar que el dashboard/auth no cambió de estilo | abrir `/auth/login` y `/dashboard` | Sin cambios visuales |
-| 7 | Commit y push a `main` | `git add -A && git commit && git push` | Push OK |
-| 8 | Vercel despliega solo. Verificar el deployment en el panel de Vercel y la URL de producción | `node scripts/compare-landing.mjs https://puntabiker.lovable.app https://punta-bikers.vercel.app` | `PARITY OK` |
+| 7 | Commit y push a `main` (respaldo del código) | `git add <archivos> && git commit && git push` | Push OK |
+| 8 | **Desplegar a producción.** El push a GitHub NO despliega: el proyecto está enlazado por CLI (`.vercel/project.json`) | `vercel --prod` | `readyState: READY` |
+| 9 | Paridad en producción | `node scripts/compare-landing.mjs https://puntabiker.lovable.app https://punta-bikers.vercel.app` | `PARITY OK` |
 
 Notas:
 - El paso 4 compara contra la **versión publicada** de Lovable. Si el cambio está en el preview pero no publicado, publícalo primero en Lovable o pasa la URL del preview como primer argumento.
@@ -64,6 +65,7 @@ Cuando el port revele algo que conviene corregir en el origen (accesibilidad, te
 
 ## Pendientes
 
+- Vercel: conectar el repo de GitHub en el panel (Project → Settings → Git) para que cada push a `main` despliegue solo. Hoy el despliegue es manual con `vercel --prod`; sin esa conexión, un push no publica nada.
 - Lovable: confirmar que cada cambio se publique a la rama `punta-biker-landing` (ya existe en GitHub) y recargar créditos.
 - La landing de Lovable no enlaza a `/auth/login` ni al dashboard. El acceso a la app sigue en esas rutas; si se quiere un botón de ingreso en la landing, debe agregarse **en Lovable** para que no lo pise el sync.
 - `robots.txt` de Lovable no se copia (el sitio también sirve áreas privadas); definir uno propio de la app.
