@@ -3,19 +3,22 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 
+type FormField = 'name' | 'email' | 'subject' | 'message'
+type FormErrors = Partial<Record<FormField, string>>
+
 export default function ContactPage() {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<Record<FormField, string>>({
     name: '',
     email: '',
     subject: '',
     message: ''
   })
-  const [errors, setErrors] = useState({})
-  const [status, setStatus] = useState(null)
+  const [errors, setErrors] = useState<FormErrors>({})
+  const [status, setStatus] = useState<'success' | 'error' | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
-  const validateForm = () => {
-    const newErrors = {}
+  const validateForm = (): FormErrors => {
+    const newErrors: FormErrors = {}
     if (!formData.name.trim()) newErrors.name = 'Name is required'
     if (!formData.email.trim()) newErrors.email = 'Email is required'
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
@@ -26,7 +29,7 @@ export default function ContactPage() {
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const field = e.target.name
+    const field = e.target.name as FormField
     setFormData(prev => ({
       ...prev,
       [field]: e.target.value
