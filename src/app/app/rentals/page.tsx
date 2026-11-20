@@ -65,7 +65,7 @@ export default function RentalsPage() {
       {rentals.length === 0 ? (
         <Card>
           <CardContent className="pt-6 text-center">
-            <p className="text-gray-600 mb-4">You haven't booked any scooters yet</p>
+            <p className="text-gray-600 mb-4">You haven&apos;t booked any scooters yet</p>
             <Link href="/app/scooters">
               <Button>Browse Available Scooters</Button>
             </Link>

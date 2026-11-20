@@ -105,7 +105,7 @@ export default function PaymentPage() {
 
       {status === 'pending' && (
         <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded">
-          ⏳ Payment is pending. We'll notify you when it's completed.
+          ⏳ Payment is pending. We&apos;ll notify you when it&apos;s completed.
         </div>
       )}
 
@@ -149,7 +149,7 @@ export default function PaymentPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm text-gray-700">
-            You'll be redirected to Mercado Pago to complete your payment securely. We accept:
+            You&apos;ll be redirected to Mercado Pago to complete your payment securely. We accept:
           </p>
           <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
             <li>Credit/Debit Cards (Visa, Mastercard, Amex)</li>

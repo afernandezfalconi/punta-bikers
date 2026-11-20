@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
       data,
       total: data?.length || 0,
     })
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Error fetching scooters:', err)
     return NextResponse.json(
       { error: 'Failed to fetch scooters', code: 'INTERNAL_ERROR' },

@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
       data,
       total: data?.length || 0,
     })
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Error fetching rentals:', err)
     return NextResponse.json(
       { error: 'Failed to fetch rentals', code: 'INTERNAL_ERROR' },
@@ -171,7 +171,7 @@ export async function POST(request: NextRequest) {
         payment_id: preference.id,
       },
     })
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Error creating rental:', err)
     return NextResponse.json(
       { error: 'Failed to create rental', code: 'INTERNAL_ERROR' },

@@ -22,18 +22,17 @@ export default function NewRentalPage() {
   });
 
   useEffect(() => {
-    fetchScooters();
+    let cancelled = false;
+    fetch('/api/scooters')
+      .then((res) => res.json())
+      .then((data: Scooter[]) => {
+        if (!cancelled) setScooters(data.filter((s) => s.status === 'available'));
+      })
+      .catch((err) => console.error('Error fetching scooters:', err));
+    return () => {
+      cancelled = true;
+    };
   }, []);
-
-  const fetchScooters = async () => {
-    try {
-      const res = await fetch('/api/scooters');
-      const data = await res.json();
-      setScooters(data.filter((s: Scooter) => s.status === 'available'));
-    } catch (err) {
-      console.error('Error fetching scooters:', err);
-    }
-  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;

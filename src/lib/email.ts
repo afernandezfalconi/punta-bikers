@@ -1,6 +1,10 @@
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+let client: Resend | null = null
+function getResend(): Resend {
+  if (!client) client = new Resend(process.env.RESEND_API_KEY)
+  return client
+}
 
 export interface EmailPayload {
   to: string
@@ -10,7 +14,7 @@ export interface EmailPayload {
 
 export async function sendEmail({ to, subject, html }: EmailPayload) {
   try {
-    const result = await resend.emails.send({
+    const result = await getResend().emails.send({
       from: 'PUNTA BIKERS <noreply@puntabikers.com>',
       to,
       subject,
@@ -21,6 +25,15 @@ export async function sendEmail({ to, subject, html }: EmailPayload) {
     console.error('Email send failed:', error)
     return { success: false, error }
   }
+}
+
+function esc(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
 }
 
 // Email Templates
@@ -56,16 +69,16 @@ export function rentalConfirmationEmail(data: {
             <h1>¡Reserva Confirmada! 🎉</h1>
           </div>
           <div class="content">
-            <p>Hola ${data.customerName},</p>
+            <p>Hola ${esc(data.customerName)},</p>
             <p>Tu reserva de scooter en PUNTA BIKERS ha sido confirmada. Aquí están los detalles:</p>
 
             <div class="detail-row">
               <span class="detail-label">Referencia:</span>
-              <span class="detail-value">#${data.rentalId.slice(0, 8).toUpperCase()}</span>
+              <span class="detail-value">#${esc(data.rentalId.slice(0, 8).toUpperCase())}</span>
             </div>
             <div class="detail-row">
               <span class="detail-label">Modelo:</span>
-              <span class="detail-value">${data.scooterModel}</span>
+              <span class="detail-value">${esc(data.scooterModel)}</span>
             </div>
             <div class="detail-row">
               <span class="detail-label">Inicio:</span>
@@ -77,14 +90,14 @@ export function rentalConfirmationEmail(data: {
             </div>
             <div class="detail-row">
               <span class="detail-label">Monto Total:</span>
-              <span class="detail-value"><strong>$${data.totalAmount} MXN</strong></span>
+              <span class="detail-value"><strong>$${esc(data.totalAmount)} MXN</strong></span>
             </div>
 
             <p style="margin-top: 20px; color: #666;">
               El próximo paso es subir tu identificación (INE o Pasaporte). Accede a tu panel para completar este paso:
             </p>
 
-            <a href="${data.dashboardLink}" class="cta-button">Ver Mi Reserva</a>
+            <a href="${esc(data.dashboardLink)}" class="cta-button">Ver Mi Reserva</a>
 
             <p style="margin-top: 20px; font-size: 14px; color: #999;">
               ¿Preguntas? Contáctanos en support@puntabikers.com
@@ -124,14 +137,14 @@ export function documentApprovedEmail(data: {
             <h1>✓ Documento Aprobado</h1>
           </div>
           <div class="content">
-            <p>Hola ${data.customerName},</p>
-            <p>Tu ${data.documentType} ha sido aprobado exitosamente. ¡Estamos un paso más cerca!</p>
+            <p>Hola ${esc(data.customerName)},</p>
+            <p>Tu ${esc(data.documentType)} ha sido aprobado exitosamente. ¡Estamos un paso más cerca!</p>
 
             <p style="margin-top: 20px; color: #666;">
               Ahora puedes proceder al pago para activar tu alquiler.
             </p>
 
-            <a href="${data.nextStepLink}" class="cta-button">Completar Pago</a>
+            <a href="${esc(data.nextStepLink)}" class="cta-button">Completar Pago</a>
 
             <p style="margin-top: 20px; font-size: 14px; color: #999;">
               ¿Preguntas? Contáctanos en support@puntabikers.com
@@ -173,12 +186,12 @@ export function paymentSuccessEmail(data: {
             <h1>💳 Pago Completado</h1>
           </div>
           <div class="content">
-            <p>Hola ${data.customerName},</p>
+            <p>Hola ${esc(data.customerName)},</p>
             <p>¡Tu pago ha sido procesado exitosamente! Tu scooter está listo para recoger.</p>
 
             <div class="highlight">
-              <p><strong>Scooter:</strong> ${data.scooterModel}</p>
-              <p><strong>Referencia de Alquiler:</strong> #${data.rentalId.slice(0, 8).toUpperCase()}</p>
+              <p><strong>Scooter:</strong> ${esc(data.scooterModel)}</p>
+              <p><strong>Referencia de Alquiler:</strong> #${esc(data.rentalId.slice(0, 8).toUpperCase())}</p>
               <p><strong>Fecha de Inicio:</strong> ${new Date(data.startDate).toLocaleDateString('es-MX')}</p>
             </div>
 
@@ -186,7 +199,7 @@ export function paymentSuccessEmail(data: {
               Ve a tu panel para ver la ubicación de recogida y detalles del scooter.
             </p>
 
-            <a href="${data.pickupLink}" class="cta-button">Ver Detalles de Recogida</a>
+            <a href="${esc(data.pickupLink)}" class="cta-button">Ver Detalles de Recogida</a>
 
             <p style="margin-top: 20px; font-size: 14px; color: #999;">
               ¿Preguntas? Contáctanos en support@puntabikers.com
@@ -228,19 +241,19 @@ export function documentRejectedEmail(data: {
             <h1>⚠️ Documento No Aprobado</h1>
           </div>
           <div class="content">
-            <p>Hola ${data.customerName},</p>
-            <p>Tu ${data.documentType} no pudo ser verificado. Por favor, revisa los comentarios abajo e intenta nuevamente.</p>
+            <p>Hola ${esc(data.customerName)},</p>
+            <p>Tu ${esc(data.documentType)} no pudo ser verificado. Por favor, revisa los comentarios abajo e intenta nuevamente.</p>
 
             <div class="warning">
               <p><strong>Razón:</strong></p>
-              <p>${data.reason}</p>
+              <p>${esc(data.reason)}</p>
             </div>
 
             <p style="margin-top: 20px; color: #666;">
               Sube una foto más clara o un documento diferente.
             </p>
 
-            <a href="${data.resubmitLink}" class="cta-button">Subir Documento Nuevamente</a>
+            <a href="${esc(data.resubmitLink)}" class="cta-button">Subir Documento Nuevamente</a>
 
             <p style="margin-top: 20px; font-size: 14px; color: #999;">
               ¿Preguntas? Contáctanos en support@puntabikers.com

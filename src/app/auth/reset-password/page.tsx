@@ -21,8 +21,8 @@ export default function ResetPasswordPage() {
     try {
       await resetPassword(email)
       setSubmitted(true)
-    } catch (err: any) {
-      setError(err.message || 'Failed to reset password')
+    } catch (err: unknown) {
+      setError((err instanceof Error ? err.message : String(err)) || 'Failed to reset password')
     } finally {
       setLoading(false)
     }
@@ -35,7 +35,7 @@ export default function ResetPasswordPage() {
           <CardHeader>
             <CardTitle>Check Your Email</CardTitle>
             <CardDescription>
-              We've sent a password reset link to your email
+              We&apos;ve sent a password reset link to your email
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">

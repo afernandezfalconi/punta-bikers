@@ -11,7 +11,7 @@ export default function VerifyEmailPage() {
         <CardHeader>
           <CardTitle>Check Your Email</CardTitle>
           <CardDescription>
-            We've sent a verification link to your email address
+            We&apos;ve sent a verification link to your email address
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -19,7 +19,7 @@ export default function VerifyEmailPage() {
             Please click the link in the email to verify your account and complete the signup process.
           </p>
           <p className="text-xs text-gray-500">
-            If you don't see the email, check your spam folder or request a new verification link.
+            If you don&apos;t see the email, check your spam folder or request a new verification link.
           </p>
           <Link href="/auth/login">
             <Button className="w-full">Back to Sign In</Button>

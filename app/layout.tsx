@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -15,10 +15,15 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "PUNTA BIKERS | Renta de Scooters en Puerto Escondido",
   description: "Renta de scooters eléctricos en Puerto Escondido, Oaxaca. Explora la playa con nuestros scooters modernos y seguros.",
-  viewport: "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+};
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
       lang="en"

@@ -33,8 +33,8 @@ export default function LoginPage() {
     try {
       await signIn(formData.email, formData.password)
       router.push('/app/dashboard')
-    } catch (err: any) {
-      setError(err.message || 'Failed to sign in')
+    } catch (err: unknown) {
+      setError((err instanceof Error ? err.message : String(err)) || 'Failed to sign in')
     } finally {
       setLoading(false)
     }
@@ -89,7 +89,7 @@ export default function LoginPage() {
                 </Link>
               </div>
               <div>
-                Don't have an account?{' '}
+                Don&apos;t have an account?{' '}
                 <Link href="/auth/signup" className="text-blue-600 hover:underline">
                   Sign Up
                 </Link>

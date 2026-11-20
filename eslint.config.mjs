@@ -12,7 +12,17 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // One-off Node setup scripts (CommonJS)
+    "create-*.js",
+    "setup-db.js",
+    "scripts/**",
   ]),
+  {
+    // Landing is synced 1:1 from Lovable (scripts/sync-lovable.mjs). Its effects read
+    // browser-only state (localStorage, matchMedia) on mount, which is intentional.
+    files: ["src/components/landing/**"],
+    rules: { "react-hooks/set-state-in-effect": "off" },
+  },
 ]);
 
 export default eslintConfig;
