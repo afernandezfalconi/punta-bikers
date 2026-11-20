@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
@@ -16,16 +16,11 @@ interface Document {
 
 export default function DocumentVerificationPage() {
   const [documents, setDocuments] = useState<Document[]>([])
-  const [loading, setLoading] = useState(true)
+  const [loading] = useState(false)
   const [selectedDoc, setSelectedDoc] = useState<Document | null>(null)
   const [action, setAction] = useState<'approve' | 'reject' | null>(null)
   const [rejectionReason, setRejectionReason] = useState('')
 
-  useEffect(() => {
-    // In a real app, this would fetch documents from the API
-    // For now, we'll show a placeholder
-    setLoading(false)
-  }, [])
 
   const handleApprove = async (docId: string) => {
     // API call to approve document

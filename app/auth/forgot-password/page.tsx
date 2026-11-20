@@ -35,7 +35,7 @@ export default function ForgotPasswordPage() {
             </div>
 
             <div>
-              <p className="text-sm text-slate-300 mb-4">Didn't receive the email? Check your spam folder.</p>
+              <p className="text-sm text-slate-300 mb-4">Didn&apos;t receive the email? Check your spam folder.</p>
               <Button
                 onClick={() => setSubmitted(false)}
                 variant="outline"

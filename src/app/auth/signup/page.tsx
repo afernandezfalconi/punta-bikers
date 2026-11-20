@@ -50,8 +50,8 @@ export default function SignupPage() {
       })
 
       router.push('/auth/verify-email')
-    } catch (err: any) {
-      setError(err.message || 'Failed to sign up')
+    } catch (err: unknown) {
+      setError((err instanceof Error ? err.message : String(err)) || 'Failed to sign up')
     } finally {
       setLoading(false)
     }

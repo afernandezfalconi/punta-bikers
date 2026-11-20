@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
       success: true,
       message: `Webhook type ${type} received`,
     })
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Webhook error:', err)
     return NextResponse.json(
       { error: 'Internal server error', code: 'INTERNAL_ERROR' },

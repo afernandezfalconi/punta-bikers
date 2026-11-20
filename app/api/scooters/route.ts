@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { getAuth } from '@/lib/api-auth';
 
 interface Scooter {
   id?: string;
@@ -47,21 +48,12 @@ export async function POST(req: NextRequest) {
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
     );
 
-    // Verify authentication + admin role (TODO: add admin role check)
-    const token = req.cookies.get('sb-access-token')?.value;
-    if (!token) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+    const auth = await getAuth(req);
+    if (!auth) {
+      return NextResponse.json({ error: 'Unauthorized', code: 'UNAUTHORIZED' }, { status: 401 });
     }
-
-    const { data: user, error: authError } = await supabase.auth.getUser(token);
-    if (authError || !user.user?.id) {
-      return NextResponse.json(
-        { error: 'Invalid authentication' },
-        { status: 401 }
-      );
+    if (!auth.isAdmin) {
+      return NextResponse.json({ error: 'Forbidden', code: 'FORBIDDEN' }, { status: 403 });
     }
 
     const body = (await req.json()) as Scooter;

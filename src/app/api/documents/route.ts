@@ -116,7 +116,7 @@ export async function POST(request: NextRequest) {
       success: true,
       data: documentData?.[0],
     })
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Error uploading documents:', err)
     return NextResponse.json(
       { error: 'Failed to upload documents', code: 'INTERNAL_ERROR' },

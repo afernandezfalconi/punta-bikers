@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 
 export default function RentalDetailsPage({ params }: { params: { id: string } }) {
@@ -20,9 +21,9 @@ export default function RentalDetailsPage({ params }: { params: { id: string } }
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <a href="/dashboard/rentals" className="text-orange-400 hover:text-orange-300 text-sm mb-4 inline-block">
+          <Link href="/dashboard/rentals" className="text-orange-400 hover:text-orange-300 text-sm mb-4 inline-block">
             ← Back to Rentals
-          </a>
+          </Link>
           <h1 className="text-4xl font-bold mb-2">Rental Details</h1>
           <p className="text-slate-300">Rental ID: {rental.id}</p>
         </div>

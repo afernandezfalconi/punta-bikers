@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
       message: `Test email sent to ${email}`,
       data: result.data,
     })
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Error sending test email:', err)
     return NextResponse.json(
       { error: 'Failed to send email', code: 'INTERNAL_ERROR' },

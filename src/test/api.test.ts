@@ -30,7 +30,7 @@ describe('API Financial Calculations', () => {
       const commission =
         subtotal.greaterThan(500) ? subtotal.times(0.1) : new Prisma.Decimal(100)
 
-      expect(commission.toString()).toBe('105.0')
+      expect(commission.equals(105)).toBe(true)
     })
 
     it('applies flat commission for subtotal <= 500', () => {

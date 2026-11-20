@@ -26,7 +26,7 @@ export default function AboutPage() {
               PUNTA BIKERS was born from a simple idea: make it easy for visitors and locals to explore Puerto Escondido on scooters. Our founder, a long-time resident of this beautiful coastal town, saw the need for a reliable, transparent scooter rental service that locals could trust.
             </p>
             <p>
-              What started as a small fleet of 5 scooters has grown to over 50 well-maintained vehicles, serving thousands of satisfied customers every year. We're committed to providing safe, affordable, and hassle-free rentals so you can focus on what matters — discovering the beauty around you.
+              What started as a small fleet of 5 scooters has grown to over 50 well-maintained vehicles, serving thousands of satisfied customers every year. We&apos;re committed to providing safe, affordable, and hassle-free rentals so you can focus on what matters — discovering the beauty around you.
             </p>
           </div>
         </div>
@@ -87,7 +87,7 @@ export default function AboutPage() {
         <div className="backdrop-blur-xl bg-gradient-to-r from-blue-500/20 to-orange-500/20 border border-white/20 rounded-3xl p-12 text-center">
           <h3 className="text-3xl font-bold mb-4">Ready to Experience Puerto Escondido?</h3>
           <p className="text-slate-300 mb-8">
-            Join thousands of happy customers who've discovered the magic of our coastal town on two wheels.
+            Join thousands of happy customers who&apos;ve discovered the magic of our coastal town on two wheels.
           </p>
           <Link href="/auth/signup">
             <Button size="lg" className="bg-gradient-to-r from-blue-500 to-orange-500 hover:from-blue-600 hover:to-orange-600">

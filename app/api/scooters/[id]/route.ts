@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getAuth, userClient } from '@/lib/api-auth';
 
 interface ScooterUpdate {
   model?: string;
@@ -12,18 +12,19 @@ interface ScooterUpdate {
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-    );
+    const auth = await getAuth(req);
+    if (!auth?.isAdmin) {
+      return NextResponse.json({ error: 'Forbidden', code: 'FORBIDDEN' }, { status: 403 });
+    }
+    const supabase = userClient(req);
 
     const body = (await req.json()) as ScooterUpdate;
-    const id = params.id;
+    const { id } = await params;
 
-    const updateData: Record<string, any> = {};
+    const updateData: Record<string, unknown> = {};
     if (body.model) updateData.model = body.model;
     if (body.licensePlate) updateData.license_plate = body.licensePlate;
     if (body.status) updateData.status = body.status;
@@ -52,15 +53,16 @@ export async function PUT(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-    );
+    const auth = await getAuth(req);
+    if (!auth?.isAdmin) {
+      return NextResponse.json({ error: 'Forbidden', code: 'FORBIDDEN' }, { status: 403 });
+    }
+    const supabase = userClient(req);
 
-    const id = params.id;
+    const { id } = await params;
 
     const { error } = await supabase
       .from('scooters')

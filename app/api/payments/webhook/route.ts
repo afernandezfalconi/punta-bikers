@@ -7,35 +7,32 @@ const MP_ACCESS_TOKEN = process.env.MERCADOPAGO_ACCESS_TOKEN;
 const MP_WEBHOOK_SECRET = process.env.MERCADOPAGO_WEBHOOK_SECRET;
 
 function verifyMercadoPagoSignature(req: NextRequest): boolean {
+  // Fail closed: without a configured secret nothing can be verified.
+  if (!MP_WEBHOOK_SECRET) return false;
+
   const signature = req.headers.get('x-signature');
   const requestId = req.headers.get('x-request-id');
-
-  if (!signature || !requestId) {
-    return false;
-  }
+  const dataId = req.nextUrl.searchParams.get('data.id');
+  if (!signature || !requestId || !dataId) return false;
 
   // MP sends signature as: "ts=<timestamp>,v1=<hash>"
-  const parts = signature.split(',');
   let ts = '';
   let v1 = '';
-
-  parts.forEach(part => {
+  for (const part of signature.split(',')) {
     const [key, value] = part.split('=');
-    if (key === 'ts') ts = value;
-    if (key === 'v1') v1 = value;
-  });
-
-  if (!ts || !v1) {
-    return false;
+    if (key?.trim() === 'ts') ts = value;
+    if (key?.trim() === 'v1') v1 = value;
   }
+  if (!ts || !v1) return false;
 
-  const dataToSign = `id=${requestId};request-id=${requestId};ts=${ts}`;
-  const expectedSignature = crypto
-    .createHmac('sha256', MP_WEBHOOK_SECRET || '')
-    .update(dataToSign)
-    .digest('hex');
+  // Manifest documented by Mercado Pago:
+  // id:<data.id>;request-id:<x-request-id>;ts:<ts>;
+  const manifest = `id:${dataId.toLowerCase()};request-id:${requestId};ts:${ts};`;
+  const expected = crypto.createHmac('sha256', MP_WEBHOOK_SECRET).update(manifest).digest('hex');
 
-  return v1 === expectedSignature;
+  const a = Buffer.from(v1);
+  const b = Buffer.from(expected);
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
 }
 
 export async function POST(req: NextRequest) {
@@ -43,7 +40,7 @@ export async function POST(req: NextRequest) {
     // Verify webhook signature
     if (!verifyMercadoPagoSignature(req)) {
       return NextResponse.json(
-        { error: 'Invalid signature' },
+        { error: 'Invalid signature', code: 'INVALID_SIGNATURE' },
         { status: 401 }
       );
     }
@@ -73,9 +70,10 @@ export async function POST(req: NextRequest) {
       const status = paymentData.status; // approved, pending, rejected, cancelled
 
       // Update payment record in Supabase
+      // Service role: the webhook has no user session and must bypass RLS.
       const supabase = createClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+        process.env.SUPABASE_SERVICE_ROLE_KEY || ''
       );
 
       // Update payment status
@@ -118,6 +116,6 @@ export async function POST(req: NextRequest) {
 }
 
 // Handle GET for webhook verification
-export async function GET(req: NextRequest) {
+export async function GET() {
   return NextResponse.json({ message: 'Webhook endpoint ready' });
 }

@@ -20,7 +20,7 @@ export default function AboutPage() {
             PUNTA BIKERS started with a simple idea: making it easier for travelers and locals to explore Puerto Escondido on electric scooters. What began as a passion project has grown into the most trusted scooter rental service on the coast.
           </p>
           <p className="text-slate-300 text-lg leading-relaxed">
-            We believe that sustainable mobility shouldn't be complicated. That's why we've built the easiest, safest, and most reliable scooter rental platform in the region.
+            We believe that sustainable mobility shouldn&apos;t be complicated. That&apos;s why we&apos;ve built the easiest, safest, and most reliable scooter rental platform in the region.
           </p>
         </div>
 

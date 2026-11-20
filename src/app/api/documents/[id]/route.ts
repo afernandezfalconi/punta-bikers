@@ -102,7 +102,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
       success: true,
       data: { status: newStatus },
     })
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Error updating document:', err)
     return NextResponse.json(
       { error: 'Failed to update document', code: 'INTERNAL_ERROR' },

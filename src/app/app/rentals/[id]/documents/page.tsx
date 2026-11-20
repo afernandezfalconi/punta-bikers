@@ -68,8 +68,8 @@ export default function DocumentUploadPage() {
       setTimeout(() => {
         router.push(`/app/rentals/${rentalId}`)
       }, 2000)
-    } catch (err: any) {
-      setError(err.message || 'Failed to upload documents')
+    } catch (err: unknown) {
+      setError((err instanceof Error ? err.message : String(err)) || 'Failed to upload documents')
     } finally {
       setLoading(false)
     }
