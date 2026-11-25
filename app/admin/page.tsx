@@ -43,6 +43,7 @@ export default function AdminDashboard() {
               <h2 className="text-2xl font-bold mb-6">Management</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {[
+                  { icon: '🪪', title: 'Documentos', desc: 'Revisar INE / pasaporte', link: '/admin/documents' },
                   { icon: '🛴', title: 'Scooters', desc: 'Manage fleet inventory', link: '/admin/scooters' },
                   { icon: '👥', title: 'Users', desc: 'View and manage users', link: '/admin/users' },
                   { icon: '📊', title: 'Reports', desc: 'View detailed analytics', link: '/admin/reports' },

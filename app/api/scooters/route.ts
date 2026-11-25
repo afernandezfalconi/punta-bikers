@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { getAuth } from '@/lib/api-auth';
+import { adminClient } from '@/lib/supabase-admin';
 
 interface Scooter {
   id?: string;
@@ -43,10 +44,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-    );
+    const supabase = adminClient();
 
     const auth = await getAuth(req);
     if (!auth) {

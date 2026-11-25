@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getAuth } from '@/lib/api-auth';
+import { adminClient } from '@/lib/supabase-admin';
 
 // Mercado Pago API
 const MERCADO_PAGO_API = 'https://api.mercadopago.com/v1';
@@ -7,27 +8,11 @@ const MP_ACCESS_TOKEN = process.env.MERCADOPAGO_ACCESS_TOKEN;
 
 export async function POST(req: NextRequest) {
   try {
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-    );
-
-    // Verify authentication
-    const token = req.cookies.get('sb-access-token')?.value;
-    if (!token) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+    const auth = await getAuth(req);
+    if (!auth) {
+      return NextResponse.json({ error: 'Unauthorized', code: 'UNAUTHORIZED' }, { status: 401 });
     }
-
-    const { data: user, error: authError } = await supabase.auth.getUser(token);
-    if (authError || !user.user?.id) {
-      return NextResponse.json(
-        { error: 'Invalid authentication' },
-        { status: 401 }
-      );
-    }
+    const supabase = adminClient();
 
     const body = await req.json();
     const { rental_id } = body;
@@ -42,7 +27,7 @@ export async function POST(req: NextRequest) {
     // Fetch rental from database to get actual cost (NEVER trust client)
     const { data: rental, error: rentalError } = await supabase
       .from('rentals')
-      .select('cost, user_id, scooter_id')
+      .select('cost, user_id, scooter_id, status')
       .eq('id', rental_id)
       .single();
 
@@ -54,10 +39,18 @@ export async function POST(req: NextRequest) {
     }
 
     // Verify user owns this rental
-    if (rental.user_id !== user.user.id) {
+    if (rental.user_id !== auth.user.id) {
       return NextResponse.json(
         { error: 'Forbidden' },
         { status: 403 }
+      );
+    }
+
+    // Payment is only possible once an admin approved the documents.
+    if (rental.status !== 'pending_payment') {
+      return NextResponse.json(
+        { error: 'Documents must be approved before paying', code: 'DOCUMENTS_NOT_APPROVED' },
+        { status: 409 }
       );
     }
 
@@ -74,12 +67,12 @@ export async function POST(req: NextRequest) {
         },
       ],
       payer: {
-        email: 'customer@example.com',
+        email: auth.user.email ?? undefined,
       },
       back_urls: {
-        success: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/rentals?status=success`,
-        failure: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/rentals?status=failure`,
-        pending: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/rentals?status=pending`,
+        success: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/rentals/${rental_id}?status=success`,
+        failure: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/rentals/${rental_id}?status=failure`,
+        pending: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/rentals/${rental_id}?status=pending`,
       },
       auto_return: 'approved',
       notification_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/payments/webhook`,

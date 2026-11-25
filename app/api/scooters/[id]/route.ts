@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAuth, userClient } from '@/lib/api-auth';
+import { getAuth } from '@/lib/api-auth';
+import { adminClient } from '@/lib/supabase-admin';
 
 interface ScooterUpdate {
   model?: string;
@@ -19,7 +20,7 @@ export async function PUT(
     if (!auth?.isAdmin) {
       return NextResponse.json({ error: 'Forbidden', code: 'FORBIDDEN' }, { status: 403 });
     }
-    const supabase = userClient(req);
+    const supabase = adminClient();
 
     const body = (await req.json()) as ScooterUpdate;
     const { id } = await params;
@@ -60,7 +61,7 @@ export async function DELETE(
     if (!auth?.isAdmin) {
       return NextResponse.json({ error: 'Forbidden', code: 'FORBIDDEN' }, { status: 403 });
     }
-    const supabase = userClient(req);
+    const supabase = adminClient();
 
     const { id } = await params;
 
