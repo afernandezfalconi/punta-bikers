@@ -32,6 +32,9 @@ DROP POLICY IF EXISTS "Enable delete for authenticated users" ON scooters;
 
 -- 4. payments: owners can read payments of their rentals; writes via server only.
 ALTER TABLE payments ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Enable read for all users" ON payments;
+DROP POLICY IF EXISTS "Enable insert for authenticated users" ON payments;
+DROP POLICY IF EXISTS "Enable update for authenticated users" ON payments;
 DROP POLICY IF EXISTS "payments_select_own" ON payments;
 CREATE POLICY "payments_select_own" ON payments
   FOR SELECT USING (
