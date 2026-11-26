@@ -1,44 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import crypto from 'crypto';
+import { verifyMercadoPagoSignature } from '@/lib/mp-signature';
 
 const MERCADO_PAGO_API = 'https://api.mercadopago.com/v1';
 const MP_ACCESS_TOKEN = process.env.MERCADOPAGO_ACCESS_TOKEN;
 const MP_WEBHOOK_SECRET = process.env.MERCADOPAGO_WEBHOOK_SECRET;
 
-function verifyMercadoPagoSignature(req: NextRequest): boolean {
-  // Fail closed: without a configured secret nothing can be verified.
-  if (!MP_WEBHOOK_SECRET) return false;
-
-  const signature = req.headers.get('x-signature');
-  const requestId = req.headers.get('x-request-id');
-  const dataId = req.nextUrl.searchParams.get('data.id');
-  if (!signature || !requestId || !dataId) return false;
-
-  // MP sends signature as: "ts=<timestamp>,v1=<hash>"
-  let ts = '';
-  let v1 = '';
-  for (const part of signature.split(',')) {
-    const [key, value] = part.split('=');
-    if (key?.trim() === 'ts') ts = value;
-    if (key?.trim() === 'v1') v1 = value;
-  }
-  if (!ts || !v1) return false;
-
-  // Manifest documented by Mercado Pago:
-  // id:<data.id>;request-id:<x-request-id>;ts:<ts>;
-  const manifest = `id:${dataId.toLowerCase()};request-id:${requestId};ts:${ts};`;
-  const expected = crypto.createHmac('sha256', MP_WEBHOOK_SECRET).update(manifest).digest('hex');
-
-  const a = Buffer.from(v1);
-  const b = Buffer.from(expected);
-  return a.length === b.length && crypto.timingSafeEqual(a, b);
-}
-
 export async function POST(req: NextRequest) {
   try {
     // Verify webhook signature
-    if (!verifyMercadoPagoSignature(req)) {
+    const verified = verifyMercadoPagoSignature({
+      secret: MP_WEBHOOK_SECRET,
+      signature: req.headers.get('x-signature'),
+      requestId: req.headers.get('x-request-id'),
+      dataId: req.nextUrl.searchParams.get('data.id'),
+    });
+    if (!verified) {
       return NextResponse.json(
         { error: 'Invalid signature', code: 'INVALID_SIGNATURE' },
         { status: 401 }
