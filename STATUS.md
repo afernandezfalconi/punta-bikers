@@ -1,6 +1,6 @@
 # PUNTA BIKERS — Estado real del proyecto
 
-**Actualizado:** 2026-11-20 (verificado con build, tsc, eslint y vitest)
+**Actualizado:** 2026-11-27 (verificado con build, tsc, eslint y vitest)
 
 ## Verificación automática
 | Check | Resultado |
@@ -20,15 +20,24 @@ Landing (Lovable), login/signup, dashboard de rentas y scooters, pagos Mercado P
 - Solo con documentos aprobados se puede crear el pago; el webhook de Mercado Pago activa la renta.
 - Las fotos van a un bucket privado `documents` (URLs firmadas de 5 min para el admin).
 
+## Infraestructura (verificada 2026-11-27)
+| Pieza | Estado |
+|-------|--------|
+| Supabase `PUNTA BIKER` | Activo (ya no está pausado). Migraciones aplicadas: `core_security_documents`, `payments_close_permissive_policies`, `drop_unused_prisma_tables`. Tablas: `scooters`, `rentals`, `payments`, `documents`, todas con RLS y **0 filas** (no hay scooters cargados). |
+| Vercel `punta-bikers` | Producción corre `e632bce` (Next 16.4.3, 23 oct). **El código nuevo de `main` (`a4fad64`: seguridad, documentos, RLS) todavía no está desplegado.** |
+| Variables en Vercel (prod) | Presentes: `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `MERCADOPAGO_ACCESS_TOKEN`, `RESEND_API_KEY`. |
+| Variables faltantes | `SUPABASE_SERVICE_ROLE_KEY`, `MERCADOPAGO_WEBHOOK_SECRET`, `ADMIN_EMAILS`. |
+
 ## Pendiente antes de operar
-1. **Reactivar el proyecto Supabase `PUNTA BIKER`** (está pausado) y aplicar `supabase/migrations/20261125000000_core_security_documents.sql` (cierra la lectura pública de rentas, agrega `documents` y el bucket privado).
-2. **Variables de entorno** en Vercel (ver `.env.example`).
-3. **Webhook en Mercado Pago** apuntando a `https://<dominio>/api/payments/webhook` con el mismo secret.
-4. **Dominio / email remitente** verificado en Resend.
-5. Marcar tu usuario como admin: `ADMIN_EMAILS` o `app_metadata.role = 'admin'`.
+1. Agregar en Vercel las variables faltantes (arriba) y **desplegar `main`** (el deploy es por CLI, no automático).
+2. Registrar el webhook en Mercado Pago apuntando a `https://<dominio>/api/payments/webhook` con el mismo secret.
+3. Verificar dominio/remitente en Resend.
+4. Marcar tu usuario como admin: `ADMIN_EMAILS` o `app_metadata.role = 'admin'`.
+5. Cargar scooters (la tabla está vacía; el seed de `package.json` apunta a Prisma, que ya no existe en la base).
+6. Prueba de punta a punta: registro, renta, documentos, aprobación, pago de prueba y activación por webhook.
 
 ## Deuda conocida
-- `prisma/schema.prisma` no se usa: las tablas reales se crean por SQL en Supabase. Decidir una sola fuente de verdad.
+- `prisma/schema.prisma` y `@prisma/client` ya no se usan y las tablas Prisma se eliminaron de Supabase: borrar el esquema y la dependencia, y el script `db:seed`.
 - CLAUDE.md dice Stripe; el código usa Mercado Pago. Actualizar CLAUDE.md.
 - `/admin` y `/api/dashboard/stats` muestran datos de ejemplo fijos, no reales.
 - Varios enlaces del panel admin (scooters, users, settings, payments, support) apuntan a páginas que no existen.
