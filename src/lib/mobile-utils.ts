@@ -45,7 +45,7 @@ export function isTouchDevice(): boolean {
     typeof window !== 'undefined' &&
     (('ontouchstart' in window) ||
       (navigator.maxTouchPoints > 0) ||
-      ((navigator as any).msMaxTouchPoints > 0))
+      (((navigator as Navigator & { msMaxTouchPoints?: number }).msMaxTouchPoints ?? 0) > 0))
   )
 }
 
@@ -74,7 +74,7 @@ export function getViewportHeight(): number {
 /**
  * Debounce function for resize/scroll events
  */
-export function debounce<T extends (...args: any[]) => any>(
+export function debounce<T extends (...args: never[]) => unknown>(
   func: T,
   wait: number
 ): (...args: Parameters<T>) => void {

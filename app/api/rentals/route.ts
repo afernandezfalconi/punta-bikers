@@ -1,130 +1,72 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { getAuth } from '@/lib/api-auth';
+import { adminClient } from '@/lib/supabase-admin';
 
+function fail(error: string, code: string, status: number) {
+  return NextResponse.json({ error, code }, { status });
+}
+
+// Customers see their own rentals; admins see all (role filtering done here, RLS is the backstop).
 export async function GET(req: NextRequest) {
   try {
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-    );
+    const auth = await getAuth(req);
+    if (!auth) return fail('Unauthorized', 'UNAUTHORIZED', 401);
 
-    // Verify authentication
-    const token = req.cookies.get('sb-access-token')?.value;
-    if (!token) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
-    const { data: user, error: authError } = await supabase.auth.getUser(token);
-    if (authError || !user.user?.id) {
-      return NextResponse.json(
-        { error: 'Invalid authentication' },
-        { status: 401 }
-      );
-    }
-
-    // Get only user's own rentals (RLS enforced by Supabase)
-    const { data: rentals, error } = await supabase
+    let query = adminClient()
       .from('rentals')
-      .select(`
-        *,
-        scooters(model, license_plate),
-        user:user_id(email)
-      `)
-      .eq('user_id', user.user.id)
+      .select('*, scooters(model, license_plate)')
       .order('created_at', { ascending: false });
+    if (!auth.isAdmin) query = query.eq('user_id', auth.user.id);
 
-    if (error && error.code !== 'PGRST116') throw error;
-
-    return NextResponse.json(rentals || []);
+    const { data, error } = await query;
+    if (error) throw error;
+    return NextResponse.json(data || []);
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    console.error('Rentals GET error:', message);
-    return NextResponse.json(
-      { error: 'Failed to fetch rentals' },
-      { status: 500 }
-    );
+    console.error('Rentals GET error:', error instanceof Error ? error.message : error);
+    return fail('Failed to fetch rentals', 'RENTALS_FETCH_FAILED', 500);
   }
 }
 
 export async function POST(req: NextRequest) {
   try {
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-    );
+    const auth = await getAuth(req);
+    if (!auth) return fail('Unauthorized', 'UNAUTHORIZED', 401);
 
-    // Verify authentication
-    const token = req.cookies.get('sb-access-token')?.value;
-    if (!token) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+    const body = await req.json().catch(() => null);
+    if (!body?.scooter_id || typeof body.scooter_id !== 'string') {
+      return fail('Missing scooter_id', 'VALIDATION_ERROR', 400);
     }
 
-    const { data: user, error: authError } = await supabase.auth.getUser(token);
-    if (authError || !user.user?.id) {
-      return NextResponse.json(
-        { error: 'Invalid authentication' },
-        { status: 401 }
-      );
-    }
-
-    const body = await req.json();
-
-    if (!body.scooter_id) {
-      return NextResponse.json(
-        { error: 'Missing scooter_id' },
-        { status: 400 }
-      );
-    }
-
-    // Verify scooter exists and is available
+    const supabase = adminClient();
     const { data: scooter, error: scooterError } = await supabase
       .from('scooters')
       .select('price_per_hour, status')
       .eq('id', body.scooter_id)
       .single();
 
-    if (scooterError || !scooter) {
-      return NextResponse.json(
-        { error: 'Scooter not found' },
-        { status: 404 }
-      );
-    }
-
+    if (scooterError || !scooter) return fail('Scooter not found', 'NOT_FOUND', 404);
     if (scooter.status !== 'available') {
-      return NextResponse.json(
-        { error: 'Scooter not available' },
-        { status: 400 }
-      );
+      return fail('Scooter not available', 'SCOOTER_UNAVAILABLE', 400);
     }
 
-    // Create rental with authenticated user ID (NOT from client)
+    // user_id, status and cost are always server-decided. A rental starts at
+    // pending_doc and only moves forward through document approval and payment.
     const { data: rental, error } = await supabase
       .from('rentals')
       .insert([
         {
           scooter_id: body.scooter_id,
-          user_id: user.user.id, // Use authenticated user, never trust client
-          status: 'pending', // Pending until payment confirmed
-          cost: scooter.price_per_hour, // Use server-side price
+          user_id: auth.user.id,
+          status: 'pending_doc',
+          cost: scooter.price_per_hour,
         },
       ])
       .select();
 
     if (error) throw error;
-
     return NextResponse.json(rental?.[0], { status: 201 });
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    console.error('Rentals POST error:', message);
-    return NextResponse.json(
-      { error: 'Failed to create rental' },
-      { status: 500 }
-    );
+    console.error('Rentals POST error:', error instanceof Error ? error.message : error);
+    return fail('Failed to create rental', 'RENTAL_CREATE_FAILED', 500);
   }
 }

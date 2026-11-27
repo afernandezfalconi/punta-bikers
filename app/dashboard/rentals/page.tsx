@@ -20,22 +20,20 @@ export default function RentalsPage() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    fetchRentals();
-  }, []);
-
-  const fetchRentals = async () => {
-    try {
-      setLoading(true);
-      const res = await fetch('/api/rentals');
-      const data = await res.json();
-      setRentals(data);
-    } catch (err) {
-      setError('Error al cargar rentas');
-      console.error(err);
-    } finally {
-      setLoading(false);
+    async function load() {
+      try {
+        const res = await fetch('/api/rentals');
+        const data = await res.json();
+        setRentals(data);
+      } catch (err) {
+        setError('Error al cargar rentas');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
     }
-  };
+    void load();
+  }, []);
 
   const completeRental = async (id: string) => {
     try {
