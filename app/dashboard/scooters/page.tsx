@@ -19,22 +19,20 @@ export default function ScootersPage() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    fetchScooters();
-  }, []);
-
-  const fetchScooters = async () => {
-    try {
-      setLoading(true);
-      const res = await fetch('/api/scooters');
-      const data = await res.json();
-      setScooters(data);
-    } catch (err) {
-      setError('Error al cargar scooters');
-      console.error(err);
-    } finally {
-      setLoading(false);
+    async function load() {
+      try {
+        const res = await fetch('/api/scooters');
+        const data = await res.json();
+        setScooters(data);
+      } catch (err) {
+        setError('Error al cargar scooters');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
     }
-  };
+    void load();
+  }, []);
 
   const deleteScooter = async (id: string) => {
     if (!confirm('¿Estás seguro de que quieres eliminar este scooter?')) return;

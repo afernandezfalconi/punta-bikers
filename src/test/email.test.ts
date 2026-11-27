@@ -42,7 +42,7 @@ describe('Email Templates', () => {
       expect(html).toContain('<head>')
       expect(html).toContain('<body>')
       expect(html).toContain('<style>')
-      expect(html).toContain('Rental Period')
+      expect(html).toContain('Referencia:')
     })
   })
 
@@ -115,7 +115,7 @@ describe('Email Templates', () => {
       expect(html).toContain('Ana Martínez')
       expect(html).toContain('Segway Ninebot Max')
       expect(html).toContain('http://localhost:3000/app/rentals/rental-101')
-      expect(html).toContain('ACTIVE')
+      expect(html).toContain('Fecha de Inicio:')
     })
 
     it('contains payment confirmation details', () => {
@@ -144,9 +144,10 @@ describe('Email Templates', () => {
         dashboardLink: 'http://test.com',
       })
 
-      // HTML should render the dangerous input as text, not execute it
-      expect(html).toContain('<script>')
-      expect(html).not.toContain('<script>alert(')
+      // User input must be rendered as inert text, never as markup
+      expect(html).not.toContain('<script>')
+      expect(html).toContain('&lt;script&gt;')
+      expect(html).not.toContain('Model<br>X')
     })
   })
 

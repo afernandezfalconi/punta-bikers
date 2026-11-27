@@ -1,49 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import crypto from 'crypto';
+import { verifyMercadoPagoSignature } from '@/lib/mp-signature';
 
 const MERCADO_PAGO_API = 'https://api.mercadopago.com/v1';
 const MP_ACCESS_TOKEN = process.env.MERCADOPAGO_ACCESS_TOKEN;
 const MP_WEBHOOK_SECRET = process.env.MERCADOPAGO_WEBHOOK_SECRET;
 
-function verifyMercadoPagoSignature(req: NextRequest): boolean {
-  const signature = req.headers.get('x-signature');
-  const requestId = req.headers.get('x-request-id');
-
-  if (!signature || !requestId) {
-    return false;
-  }
-
-  // MP sends signature as: "ts=<timestamp>,v1=<hash>"
-  const parts = signature.split(',');
-  let ts = '';
-  let v1 = '';
-
-  parts.forEach(part => {
-    const [key, value] = part.split('=');
-    if (key === 'ts') ts = value;
-    if (key === 'v1') v1 = value;
-  });
-
-  if (!ts || !v1) {
-    return false;
-  }
-
-  const dataToSign = `id=${requestId};request-id=${requestId};ts=${ts}`;
-  const expectedSignature = crypto
-    .createHmac('sha256', MP_WEBHOOK_SECRET || '')
-    .update(dataToSign)
-    .digest('hex');
-
-  return v1 === expectedSignature;
-}
-
 export async function POST(req: NextRequest) {
   try {
     // Verify webhook signature
-    if (!verifyMercadoPagoSignature(req)) {
+    const verified = verifyMercadoPagoSignature({
+      secret: MP_WEBHOOK_SECRET,
+      signature: req.headers.get('x-signature'),
+      requestId: req.headers.get('x-request-id'),
+      dataId: req.nextUrl.searchParams.get('data.id'),
+    });
+    if (!verified) {
       return NextResponse.json(
-        { error: 'Invalid signature' },
+        { error: 'Invalid signature', code: 'INVALID_SIGNATURE' },
         { status: 401 }
       );
     }
@@ -73,9 +47,10 @@ export async function POST(req: NextRequest) {
       const status = paymentData.status; // approved, pending, rejected, cancelled
 
       // Update payment record in Supabase
+      // Service role: the webhook has no user session and must bypass RLS.
       const supabase = createClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+        process.env.SUPABASE_SERVICE_ROLE_KEY || ''
       );
 
       // Update payment status
@@ -118,6 +93,6 @@ export async function POST(req: NextRequest) {
 }
 
 // Handle GET for webhook verification
-export async function GET(req: NextRequest) {
+export async function GET() {
   return NextResponse.json({ message: 'Webhook endpoint ready' });
 }
